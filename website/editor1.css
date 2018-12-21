@@ -1,0 +1,185 @@
+body,
+html {
+	margin: 0;
+	padding: 0;
+	background: rgba(0, 0, 0, 0.699);
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+p {
+	color: #363636;
+	cursor: default;
+}
+a {
+	font-weight: normal;
+	color: #76C45F;
+}
+a:hover {
+	text-decoration: underline;
+}
+footer {
+	position: fixed;
+	background: #76C45F;
+	bottom: 0;
+	width: 100%;
+	text-align: center;
+}
+footer p,
+footer a {
+	color: white;
+	font-size: .8rem;
+	margin-left: 3px;
+	margin-right: 3px;
+}
+.editor-top-wrapp button,
+.editor-menu button {
+	color: #363636;
+	background: white;
+	border: 1px solid #C9C7C7;
+	border-radius: 3px;
+	box-shadow: 0 1px 1px 1px rgba(0, 0, 0, 0.1);
+}
+.editor-top-wrapp button:hover,
+.editor-menu button:hover {
+	border: 1px solid #363636;
+}
+.editor-wrapp {
+	position: fixed;
+	display: grid;
+	background: white;
+	grid-template-columns: 1fr;
+	grid-template-rows: .08fr 1fr;
+	height: 100vh;
+	width: 80%;
+	margin: 0 10%;
+}
+.editor-top-wrapp {
+	max-height: 300px;
+}
+.editor-top-wrapp button {
+	width: 150px;
+	height: 40px;
+	margin-top: 20px;
+	font-weight: lighter;
+}
+.editor-top-wrapp button:first-child {
+	margin-left: 23.2%;
+}
+.editor-inner-wrapp {
+	display: grid;
+	grid-template-columns: 1fr 2fr 1fr;
+}
+.paper {
+	background: #E8E8E8;
+}
+.p-comment {
+	font-size: 1.1rem;
+	width: 85%;
+	margin: 0 auto;
+	text-align: center;
+	font-weight: lighter;
+}
+.editor-menu {
+	display: grid;
+	grid-template-columns: 1fr;
+	margin: 20% 30% 0;
+}
+.editor-menu button,
+.editor-menu div div button {
+	font-weight: bold;
+	width: 140px;
+	height: 40px;
+	margin-bottom: 10px;
+}
+.editor-menu div div #signature,
+.editor-menu div div #initials {
+	position: absolute;
+	height: 0;
+	width: 0;
+}
+.editor-menu div div:hover #signature,
+.editor-menu div div:hover #initials {
+	height: 150px;
+	width: 400px;
+	background: white;
+	border: 1px solid #C9C7C7;
+	box-shadow: 0 2px 2px 1px rgba(0, 0, 0, 0.1);
+	border-radius: 10px;
+}
+.editor-menu div div:hover #signature {
+	background: white url("images/sign_here.svg");
+	background-repeat: no-repeat;
+	background-size: 50%;
+	background-position: center;
+}
+.editor-menu div div:hover #signature,
+.editor-menu div div:hover #initials {
+	margin: -50px 0 0 -130px;
+}
+.editor-menu div div:hover input {
+	width: 350px;
+	height: 40px;
+	margin: 70px 20px;
+	padding: 2.5px 5px;
+	border: 1px solid #C9C7C7;
+	color: #363636;
+	border-radius: 5px;
+	font-size: 1.05rem;
+	text-align: center;
+}
+.editor-menu div div #initials input {
+	position: absolute;
+	display: none;
+}
+.editor-menu div div:hover #initials input {
+	display: block;
+}
+.editor-menu div div #signature-underline {
+	position: absolute;
+	display: none;
+	background: url("images/sign_here.png");
+	width: 276px;
+	height: 38px;
+	margin: 35px 0 0 -60px;
+}
+.editor-menu div div:hover #signature-underline {
+	display: block;
+}
+.editor-menu div div:hover #confirm-signature,
+.editor-menu div div:hover #confirm-initials {
+	position: absolute;
+	height: 25px;
+	width: 25px;
+	margin: -40px 0 0 230px;
+	background: url("images/confirm.svg");
+}
+.editor-menu div div:hover #confirm-signature:hover,
+.editor-menu div div:hover #confirm-initials:hover {
+	box-shadow: 0 0 2px 1px #76C45F, 0 0 2px 1px #76C45F inset;
+	border-radius: 50%;
+}
+.editor-menu div a {
+	position: absolute;
+	display: block;
+	margin: -45px 150px 0;
+}
+#checkmark {
+	background: url("images/Checkmark.svg");
+	background-size: 25px;
+}
+#cross {
+	background: url("images/Cross.svg");
+	background-size: 15px;
+}
+#bullet {
+	background: url("images/Bullet.svg");
+	background-size: 20px;
+}
+#checkmark,
+#cross,
+#bullet {
+	background-repeat: no-repeat;
+	background-position: center center;
+}
+#highlight {
+	color: #D4D400;
+}

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Paperdaz - Editor</title>
+	<link rel="stylesheet" type="text/css" href="editor.css">
+</head>
+
+<body>
+	<div class="editor-wrapp">
+		<div class="editor-top-wrapp">
+			<button>Save for later</button>
+			<button>Viewed & Completed</button>
+			<button>Close</button>
+		</div>
+		<div class="editor-inner-wrapp">
+			<p class="p-comment">Click <a>here</a> to add comments</p>
+			<div id="drawingArea" class="paper" style="position: relative">
+				<canvas style="left: 20px;" id="intro-canvas"></canvas>
+				<canvas style="display: none;" id="pdf_canvas"></canvas>
+				<div id="the-svg"></div>
+			</div>
+			<div>
+
+				<p class="p-comment">Click on <a>Variables</a> below and apply on the document</p>
+				<div class="editor-menu">
+					<button id="checkmark"></button>
+					<button id="cross"></button>
+					<button id="bullet"></button>
+					<button id="highlight">Hihglight</button>
+					<button id="addDateButton">Date</button>
+					<button id="addTextButton">Text</button>
+					<button id="addNameButton">Your Name</button>
+					<!-- This part is done with hover in css couse i had to hide it but it should actualy be managed click event-->
+					<div>
+						<div>
+							<button id="addSignatureButton">Signature</button>
+							<canvas id="signature"></canvas>
+							<div id="confirm-signature"></div>
+							<div id="signature-underline"></div>
+						</div>
+						<a>Edit</a>
+					</div>
+					<div>
+						<div>
+							<button id="addInitialButton">Initials</button>
+							<div id="initials">
+								<input id="initials-input" type="text" placeholder="Type initials here...">
+							</div>
+							<div id="confirm-initials"></div>
+						</div>
+						<a>Edit</a>
+					</div>
+				</div>
+			</div>
+
+		</div>
+	</div>
+	<footer>
+		<p>
+			<a>2018 © PAPERDAZ</a> |
+			<a>All Rights Reserved.</a> |
+			<a>Mission</a> |
+			<a>FAQ's</a> |
+			<a>Soft Launch</a> |
+			<a>Contact</a> |
+			<a>Chat with us!</a>
+		</p>
+	</footer>
+	<script type="text/javascript" src="/pdf.js"></script>
+	<script src="lib/fabric.js"></script>
+	<script src="js/master.js"></script>
+	<script src="js/jquery.min.js"></script>
+
+	<script type="text/javascript">
+		$(document).ready(function($) {
+			// Element Type
+			var elementType = 0;
+			var initialPDF;
+			// URL of PDF document
+			var widthToUse = 0;
+			var heightToUse = 0;
+			var distanceCanvasFromTop = 0;
+			var distanceCanvasFromLeft = 0;
+			var scale;
+			var url = "/pdf_file1";
+			//<canvas id="pdf_canvas"></canvas>
+			//<div id="the-svg"></div>
+			//<canvas id="paper" class="paper" width="720" height="800"></canvas>
+
+			fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
+			fabric.Object.prototype.transparentCorners = false;
+
+			var PDFJS = window['pdfjs-dist/build/pdf'];
+			// The workerSrc property shall be specified.
+			PDFJS.GlobalWorkerOptions.workerSrc = '/pdf.worker.js';
+			$("footer").height();
+			var canvas;
+
+			// Asynchronous download PDF
+			PDFJS.getDocument(url)
+				.then(function(pdf) {
+					initialPDF = pdf;
+					return pdf.getPage(1);
+				})
+				.then(function(page) {
+					// Set scale (zoom) level
+					var pageDefaultViewport = page.getViewport(1);
+					var pdfPageWidth = pageDefaultViewport.width;
+					var pdfPageHeight = pageDefaultViewport.height;
+					var pdfPageAspectRatio = pdfPageWidth / pdfPageHeight;
+
+					var availableScreenHeight = $("#drawingArea").height() - $("footer").height();
+					var availableScreenWidth = $("#drawingArea").width();
+					widthToUse = availableScreenWidth;
+					heightToUse = widthToUse / pdfPageAspectRatio;
+					distanceCanvasFromTop = (availableScreenHeight - heightToUse) / 2;
+					distanceCanvasFromLeft = 0;
+					if (heightToUse > availableScreenHeight) {
+						heightToUse = availableScreenWidth;
+						widthToUse = heightToUse * pdfPageAspectRatio;
+						distanceCanvasFromTop = 0;
+						distanceCanvasFromLeft = (availableScreenWidth - widthToUse) / 2;
+					}
+
+					scale = 1;
+					// Get viewport (dimensions)
+					var viewport = page.getViewport(scale);
+
+					// Get pdfCanvas#pdf_canvas
+					var pdfCanvas = document.getElementById('pdf_canvas');
+
+					// Fetch pdfCanvas' 2d context
+					var context = pdfCanvas.getContext('2d');
+
+					// Set dimensions to pdfCanvas
+					pdfCanvas.height = viewport.height;
+					pdfCanvas.width = viewport.width;
+					$("#intro-canvas").attr("width", widthToUse);
+					$("#intro-canvas").attr("height", heightToUse);
+					canvas = new fabric.Canvas('intro-canvas');
+
+					function fabricClickHandler(event, fabricObj) {
+						var cookedData = {
+							left: event.clientX - fabricObj.upperCanvasEl.getBoundingClientRect().left,
+							top: event.clientY - fabricObj.upperCanvasEl.getBoundingClientRect().top
+						};
+						var contentToAdd;
+						if (elementType == 1) {
+							//Checkmark
+							elementType = 0;
+							//cookedData
+							fabric.loadSVGFromString('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21.737 16.382"><defs><style>.a{fill:none;stroke:#363636;stroke-width:3px;}</style></defs><path class="a" d="M2.314,7.071l7.131,7.3,5.15-5.458,7.292-7.729" transform="translate(-1.241 -0.155)"/></svg>', function(objects, options) {
+								var shape = fabric.util.groupSVGElements(objects, options);
+								shape.set(cookedData);
+
+								canvas.add(shape);
+								canvas.calcOffset();
+							});
+						} else if (elementType == 2) {
+							//Cross
+							elementType = 0;
+							//cookedData
+							fabric.loadSVGFromString('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 24"><defs><style>.a{fill:#363636;font-size:18px;font-family:SegoeUI-Bold, Segoe UI;font-weight:700;letter-spacing:0.03em;}</style></defs><text class="a" transform="translate(6 19)"><tspan x="-5.897" y="0">X</tspan></text></svg>', function(objects, options) {
+								var shape = fabric.util.groupSVGElements(objects, options);
+								shape.set(cookedData);
+
+								canvas.add(shape);
+								canvas.calcOffset();
+							});
+						} else if (elementType == 3) {
+							// Bullet
+							elementType = 0;
+							//cookedData
+							fabric.loadSVGFromString('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><defs><style>.a{fill:#fff;stroke:#363636;stroke-width:2px;}.b{fill:#363636;}.c{stroke:none;}.d{fill:none;}</style></defs><g transform="translate(-790 -628)"><g class="a" transform="translate(790 628)"><circle class="c" cx="10" cy="10" r="10"/><circle class="d" cx="10" cy="10" r="9"/></g><circle class="b" cx="5" cy="5" r="5" transform="translate(795 633)"/></g></svg>', function(objects, options) {
+								var shape = fabric.util.groupSVGElements(objects, options);
+								shape.set(cookedData);
+
+								canvas.add(shape);
+								canvas.calcOffset();
+							});
+
+						} else if (elementType == 4) {
+							// Highlight
+							elementType = 0;
+							//cookedData
+						} else if (elementType == 5) {
+							// Date
+							elementType = 0;
+							//cookedData
+							cookedData.fill = "#000";
+							cookedData.fontSize = 18;
+							cookedData.selectable = true;
+							contentToAdd = new fabric.IText('12/19/2018', cookedData);
+						} else if (elementType == 6) {
+							// Text
+							elementType = 0;
+							//cookedData
+							cookedData.fill = "#000";
+							cookedData.fontSize = 18;
+							cookedData.selectable = true;
+							contentToAdd = new fabric.IText('Sample text', cookedData);
+						} else if (elementType == 7) {
+							// Name
+							elementType = 0;
+							//cookedData
+
+							cookedData.fill = "#000";
+							cookedData.fontSize = 18;
+							cookedData.selectable = true;
+							contentToAdd = new fabric.IText('Your Name', cookedData);
+
+						} else if (elementType == 8) {
+							// Name
+							elementType = 0;
+							//cookedData
+
+							// free drawing
+							var path = {
+								"type": "path",
+								"originX": "center",
+								"originY": "center",
+								left: event.clientX - fabricObj.upperCanvasEl.getBoundingClientRect().left,
+								top: event.clientY - fabricObj.upperCanvasEl.getBoundingClientRect().top,
+								"width": 232,
+								"height": 49,
+								"fill": null,
+								"overlayFill": null,
+								"stroke": "#aaf",
+								"strokeWidth": 10,
+								"strokeDashArray": null,
+								"scaleX": 1,
+								"scaleY": 1,
+								"angle": 0,
+								"flipX": false,
+								"flipY": false,
+								"opacity": 1,
+								"selectable": true,
+								"hasControls": true,
+								"hasBorders": true,
+								"hasRotatingPoint": true,
+								"transparentCorners": true,
+								"TargetFind": false,
+								"shadow": {
+									"color": "#aaf",
+									"blur": 0,
+									"offsetX": 0,
+									"offsetY": 0
+								},
+								"visible": true,
+								"path": [
+									["M", 0, 42],
+									["Q", 0, 42, 0, 42],
+									["Q", 0, 42, 0.5, 42],
+									["Q", 1, 42, 1, 41.5],
+									["Q", 1, 41, 3, 39],
+									["Q", 5, 37, 10.5, 31],
+									["Q", 16, 25, 24.5, 18],
+									["Q", 33, 11, 37, 8],
+									["Q", 41, 5, 45.5, 2.5],
+									["Q", 50, 0, 52.5, 0],
+									["Q", 55, 0, 57, 0],
+									["Q", 59, 0, 60, 3],
+									["Q", 61, 6, 64, 19.5],
+									["Q", 67, 33, 68, 37],
+									["Q", 69, 41, 69.5, 44],
+									["Q", 70, 47, 71.5, 48],
+									["Q", 73, 49, 76, 49],
+									["Q", 79, 49, 85.5, 44],
+									["Q", 92, 39, 100.5, 33],
+									["Q", 109, 27, 113.5, 23],
+									["Q", 118, 19, 125.5, 16],
+									["Q", 133, 13, 139.5, 13.5],
+									["Q", 146, 14, 149, 17.5],
+									["Q", 152, 21, 153.5, 24],
+									["Q", 155, 27, 156.5, 29.5],
+									["Q", 158, 32, 160.5, 32.5],
+									["Q", 163, 33, 166, 32],
+									["Q", 169, 31, 172, 27.5],
+									["Q", 175, 24, 179, 20.5],
+									["Q", 183, 17, 185.5, 14.5],
+									["Q", 188, 12, 189.5, 12],
+									["Q", 191, 12, 192.5, 12],
+									["Q", 194, 12, 195.5, 15],
+									["Q", 197, 18, 199, 19.5],
+									["Q", 201, 21, 203, 22.5],
+									["Q", 205, 24, 207.5, 24],
+									["Q", 210, 24, 214.5, 23.5],
+									["Q", 219, 23, 222.5, 20.5],
+									["Q", 226, 18, 229, 15.5],
+									["L", 232, 13]
+								],
+								"pathOffset": {
+									"x": 116,
+									"y": 24.5
+								}
+							};
+
+							fabric.Path.fromObject(path, function(path) {
+								canvas.add(path);
+							});
+						} else if (elementType == 9) {
+							// Name
+							elementType = 0;
+							//cookedData
+
+							cookedData.fill = "#000";
+							cookedData.fontSize = 18;
+							cookedData.selectable = true;
+							contentToAdd = new fabric.IText('I.O', cookedData);
+						}
+						if (contentToAdd) {
+							fabricObj.add(contentToAdd);
+						}
+					}
+					$(canvas.upperCanvasEl).click(function(event) {
+						fabricClickHandler(event, canvas);
+					});
+					// Prepare object needed by render method
+					var renderContext = {
+						canvasContext: context,
+						viewport: viewport
+					};
+					page.render(renderContext).then(function() {
+						// Render PDF page
+						fabric.Image.fromURL(pdfCanvas.toDataURL('image/jpeg'), function(img) {
+							$(".canvas-container").css({
+								left: distanceCanvasFromLeft,
+								top: distanceCanvasFromTop,
+							});
+
+							canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+								scaleX: canvas.width / img.width,
+								scaleY: canvas.height / img.height,
+								originX: 'left',
+								originY: 'top'
+							});
+						});
+					})
+				});
+			$(document).on("click", "#checkmark", function() {
+				//Checkmark
+				elementType = 1;
+			});
+
+			$(document).on("click", "#cross", function() {
+				//Cross
+				elementType = 2;
+			});
+			$(document).on("click", "#bullet", function() {
+				// Bullet
+				elementType = 3;
+			});
+			$(document).on("click", "#highlight", function() {
+				// Text
+				elementType = 4;
+			});
+			$(document).on("click", "#addDateButton", function() {
+				// Text
+				elementType = 5;
+			});
+			$(document).on("click", "#addTextButton", function() {
+				// Text
+				elementType = 6;
+			});
+			$(document).on("click", "#addNameButton", function() {
+				// Text
+				elementType = 7;
+			});
+			$(document).on("click", "#addSignatureButton", function() {
+				// Text
+				elementType = 8;
+			});
+			$(document).on("click", "#addInitialButton", function() {
+				// Text
+				elementType = 9;
+			});
+		});
+
+	</script>
+</body>
+
+</html>
